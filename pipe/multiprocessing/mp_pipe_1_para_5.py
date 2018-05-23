@@ -5,16 +5,17 @@ def write(pipe):
     for j in range(5):
         number = random.randint(0,100) # Gera um número aleatório
         w.send(number) # Envia o número para o Pipe
-        print("Mensagem escrita no Pipe {}".format(number))
-    w.close()
+        print("Mensagem escrita no Pipe: {} pelo processo {}".format(number, os.getpid()))
+
 
 def read(pipe, t):
     r, w = pipe
-    l, barrier = t # l = Lock e barrier = Barrier()
-    w.close()
+    lock, barrier = t # l = Lock e barrier = Barrier()
+    w.close() # Fecha a escrita no Pipe
+
     try:
         barrier.wait() # Espera todas as Processs chegarem nesse ponto
-        l.acquire() # Trava região crítica
+        lock.acquire() # Trava região crítica
         msg = r.recv()    # Lê da saída do Pipe
         print("Process {} recebe: {}".format(os.getpid(), msg))
         
@@ -24,8 +25,7 @@ def read(pipe, t):
         print("OSError")
         
     finally:
-        l.release() # Destrava
-
+        lock.release() # Destrava
             
 
 def mp_pipe_1_para_5():
@@ -35,12 +35,12 @@ def mp_pipe_1_para_5():
 
     writer.start() # Inicia o mesmo
 
-    l = multiprocessing.Lock() # Instancia uma trava
+    lock = multiprocessing.Lock() # Instancia uma trava
 
     reader = []
 
     for i in range(5): # Cria uma lista de processos 
-        reader.append(multiprocessing.Process(target=read, args=((r, w), (l, barrier))))
+        reader.append(multiprocessing.Process(target=read, args=((r, w), (lock, barrier))))
 
     start = time.time() # Inicia a contagem do tempo de processamento de leitura
     for i in range(5):

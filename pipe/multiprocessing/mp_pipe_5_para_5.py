@@ -5,19 +5,20 @@ def write(pipe, n):
     for j in range(5):
         number = random.randint(0,100) # Gera um número aleatório
         w.send(number) # Envia o número para o Pipe
-        print("Mensagem escrita no Pipe {}: {}".format(n, number))
-    w.close() # Bloqueia escritas no Pipe
+        print("Mensagem escrita no Pipe: {} pelo processo {}".format(number, os.getpid()))
+    
     print("\n")
+    
 
 def read(pipe, t):
     r, w = pipe
     aux, barrier = t
-    l, n = aux # l = Lock e n = Número do Pipe
-    w.close()
+    lock, n = aux # l = Lock e n = Número do Pipe
+    w.close() # Fecha a escrita no Pipe
 
     try:
         barrier.wait() # Espera todas as Processs chegarem nesse ponto
-        l.acquire() # Trava região crítica
+        lock.acquire() # Trava região crítica
         
         msg = r.recv()    # Lê da saída do Pipe
         print("Process {} recebe: {} do Pipe {}".format(os.getpid(), msg, n))
@@ -28,7 +29,7 @@ def read(pipe, t):
         print("OSError")
         
     finally:
-        l.release() # Destrava
+        lock.release() # Destrava
 
 def mp_pipe_1_para_5():
     pipes = []
