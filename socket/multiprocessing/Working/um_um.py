@@ -17,40 +17,38 @@ port = 2426
 addr = (host, port)
 
 
-## Sockets
-
-server_procs = []
-client_procs = []
-
-
 ## defs
+
+# Generates numbers between 1 and 100    
 
 
 def rnum():
     return random.randint(1, 100)
 
 
+# Creates Server Sockets
+
+
 def server_start():
-    #time.sleep(0.2)
     messages_counter = 0
 
+    # First try: Server Socket are created and binded to an address
     try:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    # Use the address port even it is blocked(root requires)
         server.bind(addr)
-        server.listen(QTD_CLIENT_PROCS)
+        server.listen(QTD_CLIENT_PROCS) # Number of messages received before reject new messages
         print("Server-{} started in {} and listening...".format(os.getpid(), addr))
     
+        # Second try: Server Socket are able to accept connections from clients and receive their messages
         try:
             while(messages_counter < QTD_CLIENT_PROCS):
-                (connection, client_addr) = server.accept()
+                (connection, client_addr) = server.accept() 
                 message_received = connection.recv(64)
                 if(not message_received):
-                    #time.sleep(0.5)
                     break
                 print("Server-{} received {} from {}".format(os.getpid(), message_received, client_addr))
                 messages_counter += 1
-                #print("msg_count_server->{}".format(messages_counter))
         
         except Exception:
             print("Was not possible to connect/recive in Server-{}".format(os.getpid()))
@@ -59,19 +57,23 @@ def server_start():
         print("Was not possible to create the Server-{}!".format(os.getpid))
 
     finally:
-        connection.close()
+        connection.close()  # Closes the connection(client socket) between client and server
         print("Server-{} done".format(os.getpid()))
 
 
+# Creates Client Sockets
+
+
 def client_start(num):
-    #time.sleep(0.4)
     message = str(num)
     print("")
 
+    # First try: Client Socket are created
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print("Client-{} started".format(os.getpid()))
     
+    # Second try: Client Socket connect in address and send a message
         try:
             client.connect(addr)
             client.send(message.encode())
@@ -87,7 +89,7 @@ def client_start(num):
         print("Client-{} done".format(os.getpid()))
 
 
-def umpum():
+def um_um():
     server_proc = mp.Process(target=server_start)
     server_proc.daemon = True
     client_proc = mp.Process(target=client_start, args=(rnum(), ))
@@ -100,5 +102,5 @@ def umpum():
 
 if __name__ == "__main__":
     total_time = time.time()
-    umpum()
+    um_um()
     print("\n\nTime spent: {}".format(time.time() - total_time))
