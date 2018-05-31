@@ -24,55 +24,80 @@ client_procs = []
 
 ## defs
 
+# Generates numbers between 1 and 100
+
 
 def rnum():
     return random.randint(1, 100)
 
 
+# Creates Server Sockets
+
+
 def server_start(prts):
-    #time.sleep(0.2)
     messages_counter = 0
 
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(addr[prts])
-    server.listen(QTD_CLIENT_PROCS)
-    print("Server-{} started in {} and listening...".format(os.getpid(), addr[prts]))
+    # First try: Server Socket are created and binded to an address
+    try:
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    # Use the address port even it is blocked(root requires)
+        server.bind(addr[prts]) # Number of messages received before reject new messages
+        server.listen(QTD_CLIENT_PROCS)
+        print("Server-{} started in {} and listening...".format(os.getpid(), addr[prts]))
 
-    while(messages_counter < QTD_CLIENT_PROCS):
-        (connection, client_addr) = server.accept()
-        message_received = connection.recv(64)
-        if(not message_received):
-            #time.sleep(0.5)
-            break
-        print("Server-{} received {} from {}".format(os.getpid(), message_received, client_addr))
-        messages_counter += 1
-        print("msg_count_server->{}".format(messages_counter))
-        connection.close()
-        #print("")
-        #time.sleep(0.1)
+        # Second try: Server Socket are able to accept connections from clients and receive their messages
+        try:
+            while(messages_counter < QTD_CLIENT_PROCS):
+                (connection, client_addr) = server.accept()
+                message_received = connection.recv(64)
+                if(not message_received):
+                    break
+                print("Server-{} received {} from {}".format(os.getpid(), message_received, client_addr))
+                messages_counter += 1
+                #connection.close()
+
+        except Exception:
+            print("Was not possible to connect/recive in Server-{}".format(os.getpid()))
+
+    except Exception:
+        print("Was not possible to create the Server-{}!".format(os.getpid))
+
+    finally:
+        connection.close()  # Closes the connection(client socket) between client and server
+        print("Server-{} done".format(os.getpid()))
 
 
 def client_start(num):
-    #time.sleep(0.4)
+    message = str(num)
     messages_counter = 0
     print("")
 
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print("Client-{} started".format(os.getpid()))
-    message = str(num)
+    # First try: Client Sockets are created
+    try:
+        client_socks = []
+        for i in range(QTD_SERVER_PROCS):
+            client_socks.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))    
+        print("Client-{} started".format(os.getpid()))
 
-    while(messages_counter < QTD_SERVER_PROCS):
-        client.connect(addr[messages_counter])
-        client.send(message.encode())
-        print("Client-{} send {} for {}".format(os.getpid(), message, addr[messages_counter]))
-        messages_counter += 1
-        print("msg_count_client->{}".format(messages_counter))
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #time.sleep(0.2)
+        # Second try: Client Sockets connect in addresses and send a message
+        try:
+            while(messages_counter < QTD_SERVER_PROCS):
+                client_socks[messages_counter].connect(addr[messages_counter])
+                client_socks[messages_counter].send(message.encode())
+                print("Client-{} send {} for {}".format(os.getpid(), message, addr[messages_counter]))
+                messages_counter += 1
+
+        except Exception:
+            print("Was not possible to connect/send in Client-{}".format(os.getpid()))
+        
+    except Exception:
+        print("Was not possible to create the Client-{}!".format(os.getpid()))
+
+    finally:
+        print("Client-{} done".format(os.getpid()))
 
 
-def cincopcinco():
+def cinco_cinco():
     for sp in range(QTD_SERVER_PROCS):
         server_procs.append(mp.Process(target=server_start, args=(sp, )))
         server_procs[sp].daemon = True
@@ -89,7 +114,8 @@ def cincopcinco():
         client_procs[j].join()
         #server_procs[i].join()
 
+
 if __name__ == "__main__":
     total_time = time.time()
-    cincopcinco()
+    cinco_cinco()
     print("\n\nTime spent: {}".format(time.time() - total_time))

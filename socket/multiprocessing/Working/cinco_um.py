@@ -16,6 +16,11 @@ port = 2424
 addr = (host, port)
 
 
+## Sockets
+
+client_procs = []
+
+
 ## defs
 
 # Generates numbers between 1 and 100
@@ -91,12 +96,14 @@ def client_start(num):
 def cinco_um():
     server_proc = mp.Process(target=server_start)
     server_proc.daemon = True
+    for cp in range(QTD_CLIENT_PROCS):
+        client_procs.append(mp.Process(target=client_start, args=(rnum(), )))
+        client_procs[cp].daemon = True
     server_proc.start()
+
     for i in range(QTD_CLIENT_PROCS):
-        client_proc = mp.Process(target=client_start, args=(rnum(), ))
-        client_proc.daemon = True
-        client_proc.start()
-        client_proc.join()
+        client_procs[i].start()
+        client_procs[i].join()
         #server_proc.join()
 
 
