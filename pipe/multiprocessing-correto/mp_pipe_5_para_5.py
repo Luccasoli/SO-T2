@@ -1,4 +1,5 @@
 import multiprocessing, os, sys, time, random, threading
+from memory_profiler import profile
 
 lock_shared = multiprocessing.Lock() # Garante a ordem correta dos "prints"
 

@@ -1,4 +1,5 @@
 import multiprocessing, os, sys, time, random, threading
+from memory_profiler import profile
 
 lock_shared = multiprocessing.Lock() # Garante a ordem correta dos "prints"
 
@@ -36,7 +37,7 @@ def read(*pipe):
     except OSError:
         print("OSError")
 
-
+@profile(precision=10)
 def mp_pipe_1_para_5():
 
     r, w = multiprocessing.Pipe() # Cria um Pipe de comunicação

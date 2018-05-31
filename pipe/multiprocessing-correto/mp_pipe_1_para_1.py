@@ -1,4 +1,5 @@
 import multiprocessing, os, random, time
+from memory_profiler import profile
 
 def write(*pipe):
 
@@ -27,7 +28,7 @@ def read(*pipe):
     except OSError:
         print("OSError")
 
-
+@profile(precision=10)
 def mp_pipe_1_para_1():
 
     r, w = multiprocessing.Pipe() # Cria um Pipe de comunicação
