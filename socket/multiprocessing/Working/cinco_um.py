@@ -3,6 +3,7 @@ import multiprocessing as mp
 import os
 import random
 import time
+#from memory_profiler import profile
 
 
 ## Informations
@@ -93,6 +94,7 @@ def client_start(num):
         print("Client-{} done".format(os.getpid()))
 
 
+@profile
 def cinco_um():
     server_proc = mp.Process(target=server_start)
     server_proc.daemon = True
@@ -110,4 +112,4 @@ def cinco_um():
 if __name__ == "__main__":
     total_time = time.time()
     cinco_um()
-    print("\n\nTime spent: {}".format(time.time() - total_time))
+    print("Time spent: {}".format(time.time() - total_time))
