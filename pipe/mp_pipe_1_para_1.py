@@ -15,6 +15,7 @@ def write(*pipe):
     except OSError:
         print("OSError")
 
+
 def read(*pipe):
 
     r, w = pipe # Variáveis de acesso ao Pipe
@@ -27,6 +28,7 @@ def read(*pipe):
         pass
     except OSError:
         print("OSError")
+
 
 @profile(precision=10)
 def mp_pipe_1_para_1():

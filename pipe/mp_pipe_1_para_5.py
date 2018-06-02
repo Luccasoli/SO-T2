@@ -37,6 +37,7 @@ def read(*pipe):
     except OSError:
         print("OSError")
 
+
 @profile(precision=10)
 def mp_pipe_1_para_5():
 
@@ -58,7 +59,6 @@ def mp_pipe_1_para_5():
     for i in range(5):
         writers[i].join
     reader.join() 
-
 
 
 if __name__ == "__main__":
