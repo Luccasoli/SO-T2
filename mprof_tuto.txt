@@ -7,4 +7,4 @@ for track memory usage:
 for plot a graphic memory x time:
     echo this in terminal:
         mprof plot --output <name.png> [file1.dat] [file2.dat]
-    --output and file names are optional
+    --output and file names are optional(if not file names, the plot will be done with the latest .dat)
