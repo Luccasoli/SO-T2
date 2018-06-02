@@ -1,0 +1,10 @@
+for track memory usage:
+    do not import nothing from memory_profiler
+    use @profile before the function that will be tracked
+    echo this in terminal:
+        mprof run --python <script.py>
+        
+for plot a graphic memory x time:
+    echo this in terminal:
+        mprof plot --output <name.png> [file1.dat] [file2.dat]
+    --output and file names are optional
